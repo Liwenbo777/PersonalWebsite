@@ -1,0 +1,176 @@
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: sans-serif;
+            background-color: #F8ECE3;
+            min-height: 100vh;
+        }
+
+        #hero-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        #hero-section {
+            position: relative;
+            width: 100%;
+            padding-bottom: 67.13%; /* 1450 / 2160 */
+            overflow: hidden;
+            cursor: default;
+        }
+
+        #hero-section.in-zone {
+            cursor: url('../assets/mouse_plane.png') 32 0, auto;
+        }
+
+        /* 背景层 */
+        #plane-bg {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #plane-bg-top {
+            flex: 1;
+            min-height: 0;
+            background-image: url('../assets/bg_sky.png');
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            background-position: center center;
+            transform-origin: center center;
+            transition: transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+
+        #plane-bg-bottom {
+            height: 13.79%; /* 200 / 1450 */
+            background: #F8ECE3;
+            flex-shrink: 0;
+        }
+
+        /* 速度线层 */
+        #speed-lines-layer {
+            position: absolute;
+            top: 0; left: 0;
+            z-index: 2;
+            background-repeat: repeat;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+
+            -webkit-mask-image: radial-gradient(
+                ellipse 600px 450px at var(--mask-x, 50%) var(--mask-y, 50%),
+                black 0%,
+                rgba(0,0,0,0.5) 45%,
+                transparent 75%
+            );
+            mask-image: radial-gradient(
+                ellipse 600px 450px at var(--mask-x, 50%) var(--mask-y, 50%),
+                black 0%,
+                rgba(0,0,0,0.5) 45%,
+                transparent 75%
+            );
+        }
+        #speed-lines-layer.active {
+            opacity: 1;
+        }
+
+        /* 云朵层 */
+        #clouds-layer {
+            position: absolute;
+            top: 0; left: 0;
+            z-index: 3;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        #clouds-layer .cloud {
+            position: absolute;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            will-change: transform;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        /* 飞机层 */
+        #plane-layer {
+            position: absolute;
+            top: 0; left: 0;
+            z-index: 4;
+            pointer-events: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .plane-wrapper {
+            position: absolute;
+            will-change: transform;
+            transform: rotate(-2deg);
+        }
+
+        /* ========== 固定层级：主机 > 左僚机 > 右僚机 ========== */
+        #plane-main  { z-index: 12; }
+        #plane-left  { z-index: 11; }
+        #plane-right { z-index: 10; }
+
+        /* 主机 */
+        #plane-main .plane-subject {
+            width: 140px; 
+            height: 140px;
+            background-image: url('../assets/plane.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            filter: drop-shadow(0 15px 25px rgba(0,0,0,0.4));
+            will-change: transform;
+        }
+
+        /* 左僚机 —— 按 536*336 等比缩放 (系数 140/766) */
+        #plane-left .plane-subject {
+            width: 98px;
+            height: 61px;
+            background-image: url('../assets/plane_left.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            filter: drop-shadow(0 15px 25px rgba(0,0,0,0.4));
+            will-change: transform;
+            opacity: 0.85;
+        }
+
+        /* 右僚机 —— 按 460*288 等比缩放 (系数 140/766) */
+        #plane-right .plane-subject {
+            width: 84px;
+            height: 53px;
+            background-image: url('../assets/plane_right.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            filter: drop-shadow(0 15px 25px rgba(0,0,0,0.4));
+            will-change: transform;
+            opacity: 0.85;
+        }
+
+        @keyframes planeFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25%      { transform: translateY(-10px) rotate(3deg); }
+            50%      { transform: translateY(0px) rotate(0deg); }
+            75%      { transform: translateY(10px) rotate(-3deg); }
+        }
+        .plane-subject.floating {
+            animation: planeFloat 2.5s ease-in-out infinite;
+        }
+        .plane-wrapper {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    will-change: transform;
+    /* 初始旋转由 JS 动态覆盖，这里可以不写 */
+}
+    </style>

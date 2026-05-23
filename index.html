@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人网页 - 纸飞机交互</title>
+   </head>
+
+
+<body>
+    <div id="hero-wrapper">
+        <div id="hero-section">
+            <div id="plane-bg">
+                <div id="plane-bg-top"></div>
+                <div id="plane-bg-bottom"></div>
+            </div>
+            <div id="speed-lines-layer"></div>
+
+            <div id="clouds-layer">
+                <div class="cloud" id="cloud-0"></div>
+                <div class="cloud" id="cloud-1"></div>
+                <div class="cloud" id="cloud-2"></div>
+            </div>
+
+            <div id="plane-layer">
+                <!-- 主机 -->
+                <div class="plane-wrapper" id="plane-main">
+                    <div class="plane-subject floating"></div>
+                </div>
+                <!-- 左僚机 -->
+                <div class="plane-wrapper" id="plane-left">
+                    <div class="plane-subject floating"></div>
+                </div>
+                <!-- 右僚机 -->
+                <div class="plane-wrapper" id="plane-right">
+                    <div class="plane-subject floating"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+<script src="js/main.js"></script>
+    </body>
+</html>
