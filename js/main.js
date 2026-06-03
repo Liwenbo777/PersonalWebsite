@@ -1,4 +1,12 @@
-
+document.addEventListener('DOMContentLoaded', () => {
+    // ========== 把原来的所有代码原封不动放到这里 ==========
+    
+    const DESIGN = { /* ... 保持原样 ... */ };
+    const CONFIG = { /* ... 上面改过的数值 ... */ };
+    // ... 其余所有代码不动，包括 class、function、animate() 等 ...
+    
+    animate();
+});
         const DESIGN = {
             width: 2160,
             activeHeight: 1250,
@@ -15,16 +23,16 @@
             outside: {
                 baseSpeed: 10,
                 tileSize: 1024,
-                lineCount: 40,
-                smearCount: 40,
-                hairCount: 30
+                lineCount: 20,
+                smearCount: 20,
+                hairCount: 15
             },
             inside: {
                 baseSpeed: 30,
                 tileSize: 1024,
-                lineCount: 80,
-                smearCount: 100,
-                hairCount: 80
+                lineCount: 40,
+                smearCount: 50,
+                hairCount: 40
             },
 
             bgZoom: {
@@ -491,3 +499,312 @@
 
         animate();
   
+
+// ========== 新增页面交互（完全不影响纸飞机代码） ==========
+document.addEventListener('DOMContentLoaded', () => {
+
+    // 1. 导航栏滚动变色
+    const navbar = document.getElementById('navbar');
+    if (navbar) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 80) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+    }
+
+    // 2. 平滑滚动 + 当前高亮
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll("#hero-wrapper, #portfolio, #portfolio-vx, #internship, #experience, #about");
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = link.getAttribute('href');
+            const target = document.querySelector(targetId);
+            if (target) {
+                const offset = navbar ? navbar.offsetHeight + 10 : 0;
+                const top = target.getBoundingClientRect().top + window.scrollY - offset;
+                window.scrollTo({ top, behavior: 'smooth' });
+            }
+        });
+    });
+
+    function updateActiveNav() {
+        let current = '';
+        const scrollPos = window.scrollY + (navbar ? navbar.offsetHeight + 100 : 100);
+        sections.forEach(section => {
+            if (scrollPos >= section.offsetTop) {
+                current = section.getAttribute('id');
+            }
+        });
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === '#' + current) {
+                link.classList.add('active');
+            }
+        });
+    }
+
+    window.addEventListener('scroll', updateActiveNav);
+    updateActiveNav();
+
+    // 3. 轮播系统（支持多组，修复箭头）
+function initCarousel(wrapper) {
+    const viewport = wrapper.querySelector('.carousel-viewport');
+    const slidesContainer = wrapper.querySelector('.carousel-slides');
+    const slideEls = Array.from(wrapper.querySelectorAll('.carousel-slide'));
+    const dotEls = Array.from((wrapper.parentElement || wrapper).querySelectorAll('.carousel-dots .dot'));
+    const prevBtn = wrapper.querySelector('.carousel-btn.prev');
+    const nextBtn = wrapper.querySelector('.carousel-btn.next');
+
+    if (!viewport || !slidesContainer || slideEls.length === 0) return;
+
+    let currentSlide = 0;
+    const totalSlides = slideEls.length;
+
+    function updateLayout(index) {
+        const slide = slideEls[index];
+        if (!slide) return;
+        const offset = viewport.clientWidth * index;
+        slidesContainer.style.transform = `translate3d(-${offset}px, 0, 0)`;
+        viewport.style.height = `${slide.offsetHeight}px`;
+    }
+
+    function goTo(index) {
+        currentSlide = ((index % totalSlides) + totalSlides) % totalSlides;
+        updateLayout(currentSlide);
+        dotEls.forEach((dot, i) => {
+            dot.classList.toggle('active', i === currentSlide);
+        });
+    }
+
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => goTo(currentSlide - 1));
+    }
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => goTo(currentSlide + 1));
+    }
+
+    dotEls.forEach((dot, i) => {
+        dot.addEventListener('click', () => goTo(i));
+    });
+
+    goTo(0);
+
+    window.addEventListener('resize', () => updateLayout(currentSlide));
+}
+
+// 初始化所有轮播
+document.querySelectorAll('.carousel-wrapper').forEach(initCarousel);
+// 4. 卡片进入动画（Intersection Observer）
+    const observerOptions = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.portfolio-card, .timeline-card, .about-card').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(el);
+    });
+
+    // ========== 作品详情 Modal ==========
+    const modal = document.getElementById('portfolio-modal');
+    if (!modal) return;
+    const modalOverlay = modal.querySelector('.modal-overlay');
+    const modalClose = modal.querySelector('.modal-close');
+    const modalTitle = document.getElementById('modal-title');
+    const modalTags = document.getElementById('modal-tags');
+    const modalDesc = document.getElementById('modal-desc');
+    const modalMediaWrap = document.getElementById('modal-media-wrap');
+    const modalCarouselWrap = document.getElementById('modal-carousel-wrap');
+    const modalSlides = document.getElementById('modal-carousel-slides');
+    const modalDots = document.getElementById('modal-carousel-dots');
+    const modalPrev = modal.querySelector('.modal-prev');
+    const modalNext = modal.querySelector('.modal-next');
+    const modalVideoWrap = document.getElementById('modal-video-wrap');
+    const modalVideoIframe = document.getElementById('modal-video-iframe');
+    const modalScrollWrap = document.getElementById('modal-scroll-wrap');
+    const modalScrollImg = document.getElementById('modal-scroll-img');
+
+    let modalCurrent = 0;
+    let modalTotal = 0;
+
+    function updateModalCarousel() {
+        modalSlides.style.transform = `translateX(-${modalCurrent * 100}%)`;
+        modalDots.querySelectorAll('.dot').forEach((d, i) => {
+            d.classList.toggle('active', i === modalCurrent);
+        });
+    }
+
+    function openModal(card) {
+        const title = card.querySelector('h4').textContent;
+        const desc = card.querySelector('.card-desc').textContent;
+        const tags = Array.from(card.querySelectorAll('.tag')).map(t => t.textContent);
+        const videoUrl = card.dataset.video;
+        const images = card.dataset.detail ? card.dataset.detail.split(',').filter(Boolean) : [];
+        const isLongFlag = card.dataset.long === 'true';
+
+        modalTitle.textContent = title;
+        modalDesc.textContent = desc;
+        modalTags.innerHTML = tags.map(t => `<span class="tag">${t}</span>`).join('');
+
+        // 重置所有模式
+        modalMediaWrap.classList.remove('is-video', 'is-long');
+        modalVideoIframe.src = '';
+        modalScrollImg.src = '';
+        modalSlides.innerHTML = '';
+        modalDots.style.display = '';
+
+        // 判断展示模式
+        if (videoUrl) {
+            // 视频模式
+            modalMediaWrap.classList.add('is-video');
+            modalVideoIframe.src = videoUrl;
+            modalDots.style.display = 'none';
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        } 
+        else if (images.length === 1 && isLongFlag) {
+            // 手动标记的长图模式
+            modalMediaWrap.classList.add('is-long');
+            modalScrollImg.src = 'assets/' + images[0].trim();
+            modalDots.style.display = 'none';
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        else if (images.length === 1) {
+            // 单张图：加载后自动判断是否为长图
+            const imgSrc = 'assets/' + images[0].trim();
+            const img = new Image();
+            img.onload = () => {
+                const isLong = img.height > img.width * 1.5 && img.height > 1000;
+                if (isLong) {
+                    modalMediaWrap.classList.add('is-long');
+                    modalScrollImg.src = imgSrc;
+                    modalDots.style.display = 'none';
+                } else {
+                    // 普通单图，走轮播
+                    modalSlides.innerHTML = `
+                        <div class="modal-carousel-slide">
+                            <img src="${imgSrc}" alt="${title}" loading="lazy">
+                        </div>
+                    `;
+                    modalTotal = 1;
+                    modalCurrent = 0;
+                    modalDots.innerHTML = `<span class="dot active" data-index="0"></span>`;
+                    updateModalCarousel();
+                }
+            };
+            img.src = imgSrc;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        else {
+            // 普通多图轮播
+            modalSlides.innerHTML = images.map(src => `
+                <div class="modal-carousel-slide">
+                    <img src="assets/${src.trim()}" alt="${title}" loading="lazy">
+                </div>
+            `).join('');
+
+            modalTotal = images.length;
+            modalCurrent = 0;
+
+            modalDots.innerHTML = Array.from({length: modalTotal}, (_, i) => 
+                `<span class="dot ${i === 0 ? 'active' : ''}" data-index="${i}"></span>`
+            ).join('');
+
+            updateModalCarousel();
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function closeModal() {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+        // 延迟清空，避免关闭动画期间闪白
+        setTimeout(() => {
+            modalSlides.innerHTML = '';
+            modalDots.innerHTML = '';
+            modalVideoIframe.src = '';
+            modalScrollImg.src = '';
+            modalMediaWrap.classList.remove('is-video', 'is-long');
+        }, 350);
+    }
+
+    document.querySelectorAll('.portfolio-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+            if (e.target.closest('.carousel-btn')) return;
+            openModal(card);
+        });
+    });
+
+    modalClose.addEventListener('click', closeModal);
+    modalOverlay.addEventListener('click', closeModal);
+    modalPrev.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (modalTotal === 0 || modalMediaWrap.classList.contains('is-video') || modalMediaWrap.classList.contains('is-long')) return;
+        modalCurrent = (modalCurrent - 1 + modalTotal) % modalTotal;
+        updateModalCarousel();
+    });
+    modalNext.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (modalTotal === 0 || modalMediaWrap.classList.contains('is-video') || modalMediaWrap.classList.contains('is-long')) return;
+        modalCurrent = (modalCurrent + 1) % modalTotal;
+        updateModalCarousel();
+    });
+    modalDots.addEventListener('click', (e) => {
+        if (e.target.classList.contains('dot') && !modalMediaWrap.classList.contains('is-video') && !modalMediaWrap.classList.contains('is-long')) {
+            modalCurrent = parseInt(e.target.dataset.index);
+            updateModalCarousel();
+        }
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+
+    // ========== 工作&实习经历展开收起 ==========
+    document.querySelectorAll('.timeline-item').forEach(item => {
+        const card = item.querySelector('.timeline-card');
+        if (!card || card.classList.contains('empty')) return;
+
+        card.addEventListener('click', () => {
+            const isExpanded = item.getAttribute('data-expanded') === 'true';
+
+            // 手风琴效果：收起其他已展开的项
+            document.querySelectorAll('.timeline-item.expanded').forEach(other => {
+                if (other !== item) {
+                    other.setAttribute('data-expanded', 'false');
+                    other.classList.remove('expanded');
+                }
+            });
+
+            if (isExpanded) {
+                item.setAttribute('data-expanded', 'false');
+                item.classList.remove('expanded');
+            } else {
+                item.setAttribute('data-expanded', 'true');
+                item.classList.add('expanded');
+            }
+        });
+    });
+});
