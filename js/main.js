@@ -532,17 +532,52 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+                // ========== 可配置：各区域高亮切换偏移量（单位：px） ==========
+    // 正值 = 提前触发（section 顶部还没到达导航栏就切换高亮）
+    // 负值 = 延迟触发（section 滚过导航栏才切换高亮）
+    // 只需修改下方数值，即可调整各区域的高亮触发时机
+    const NAV_OFFSETS = {
+        'hero-wrapper': 0,
+        'portfolio': 0,
+        'portfolio-vx': 0,
+        'internship': 0,
+        'experience': 0,
+        'about': 800  // ← 关于我：提前 300px 触发，解决高度不足无法滚到顶部的问题
+    };
+
     function updateActiveNav() {
-        let current = '';
-        const scrollPos = window.scrollY + (navbar ? navbar.offsetHeight + 100 : 100);
+        let current = '#hero-wrapper';
+        const offset = navbar ? navbar.offsetHeight : 0;
+        const scrollPos = window.scrollY + offset;
+        
+        let activeSectionId = 'hero-wrapper';
         sections.forEach(section => {
-            if (scrollPos >= section.offsetTop) {
-                current = section.getAttribute('id');
+            // 使用绝对位置，避免 main{position:relative} 导致 offsetTop 失真
+            const sectionTop = section.getBoundingClientRect().top + window.scrollY;
+            const sectionId = section.getAttribute('id');
+            // 读取自定义偏移量：正值提前触发，负值延迟触发
+            const customOffset = NAV_OFFSETS[sectionId] || 0;
+            
+            if (scrollPos >= sectionTop - customOffset) {
+                activeSectionId = sectionId;
             }
         });
+        
+        // 子区域映射到对应的导航项
+        const sectionToNav = {
+            'hero-wrapper': '#hero-wrapper',
+            'portfolio': '#portfolio',
+            'portfolio-vx': '#portfolio',
+            'internship': '#portfolio',
+            'experience': '#about',
+            'about': '#about'
+        };
+        
+        current = sectionToNav[activeSectionId] || current;
+        
         navLinks.forEach(link => {
             link.classList.remove('active');
-            if (link.getAttribute('href') === '#' + current) {
+            if (link.getAttribute('href') === current) {
                 link.classList.add('active');
             }
         });
@@ -807,4 +842,13 @@ document.querySelectorAll('.carousel-wrapper').forEach(initCarousel);
             }
         });
     });
+
+    // ========== 个人信息卡片展开收起 ==========
+    const aboutCard = document.getElementById('about-card');
+    if (aboutCard) {
+        aboutCard.addEventListener('click', (e) => {
+            if (e.target.closest('a') || e.target.closest('button')) return;
+            aboutCard.classList.toggle('expanded');
+        });
+    }
 });
