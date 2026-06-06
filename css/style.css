@@ -626,7 +626,7 @@ body {
     color: #415968;
 }
 .internship-grid .card-desc {
-    font-size: 12.5px;
+    font-size: 16px;
     line-height: 1.6;
     color: #415968;
 }
@@ -729,9 +729,15 @@ body {
     grid-template-columns: 1fr 1fr;
     gap: 60px;
     transition: box-shadow 0.3s ease;
+    position: relative;
+    cursor: pointer;
 }
 .about-card:hover {
     box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+}
+.about-left {
+    display: flex;
+    flex-direction: column;
 }
 .about-name {
     font-size: 26px;
@@ -777,6 +783,49 @@ body {
     color: #415968;
     font-weight: 500;
 }
+
+/* ========== 右侧技能区：预览图 + 详情 ========== */
+.about-right {
+    position: relative;
+}
+
+/* 未展开：显示切图 */
+.skills-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    height: 100%;
+    min-height: 240px;
+}
+.skills-preview .skills-title {
+    margin-bottom: 18px;
+}
+.skills-preview img {
+    align-self: center;
+    max-width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 10px;
+}
+
+/* 展开后：显示详细文本 */
+.skills-detail {
+    display: none;
+}
+
+.about-card.expanded {
+    cursor: default;
+}
+
+.about-card.expanded .skills-preview {
+    display: none;
+}
+
+.about-card.expanded .skills-detail {
+    display: block;
+}
+
 .skills-title {
     font-size: 17px;
     font-weight: 600;
@@ -792,6 +841,38 @@ body {
     line-height: 1.9;
     margin-bottom: 6px;
     padding-left: 4px;
+}
+
+/* 右上角提示文字 */
+.about-card::after {
+    content: '点击展开';
+    position: absolute;
+    right: 24px;
+    top: 24px;
+    font-size: 13px;
+    color: #FF9A5C;
+    background: rgba(255,255,255,0.92);
+    padding: 5px 14px;
+    border-radius: 6px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    font-weight: 500;
+    z-index: 2;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    backdrop-filter: blur(4px);
+}
+
+.about-card:hover::after {
+    opacity: 1;
+}
+
+.about-card.expanded::after {
+    content: '点击收起';
+}
+
+.about-card.expanded:hover::after {
+    opacity: 1;
 }
 
 /* ========== 响应式断点 ========== */
@@ -834,6 +915,15 @@ body {
         gap: 32px;
         padding: 28px;
     }
+    .about-card::after {
+        right: 16px;
+        top: 16px;
+        font-size: 12px;
+        padding: 4px 10px;
+    }
+    .skills-preview {
+        min-height: 180px;
+    }
     .carousel-btn {
         display: none;
     }
@@ -861,7 +951,7 @@ body {
     content: '点击展开';
     position: absolute;
     right: 20px;
-    top: 20px;
+    top: 56px;
     font-size: 12px;
     color: #FF9A5C;
     opacity: 0;
@@ -967,27 +1057,49 @@ body {
     position: relative;
 }
 
-#portfolio .portfolio-category .category-title,
-#portfolio-vx .portfolio-category .category-title,
-#internship > .container > .category-title,
-#experience > .container > .category-title,
-#about > .container > .category-title {
+/* ===== 作品集标题位置 ===== */
+#portfolio .portfolio-category .category-title {
     position: absolute;
     left: 440px;
+    top: 136px;
     z-index: 10;
     margin: 0;
 }
 
-#portfolio .portfolio-category .category-title {
-    top: 136px;
-}
+/* ===== 诛仙世界VX作品标题位置 ===== */
 #portfolio-vx .portfolio-category .category-title {
+    position: absolute;
+    left: 440px;
     top: 60px;
+    z-index: 10;
+    margin: 0;
 }
-#internship > .container > .category-title,
-#experience > .container > .category-title,
-#about > .container > .category-title {
+
+/* ===== 实习作品标题位置 ===== */
+#internship > .container > .category-title {
+    position: absolute;
+    left: 440px;
     top: 60px;
+    z-index: 10;
+    margin: 0;
+}
+
+/* ===== 工作&实习经历标题位置（可独立调整） ===== */
+#experience > .container > .category-title {
+    position: absolute;
+    left: 660px;      /* ← 改这里：水平位置 */
+    top: 60px;        /* ← 改这里：垂直位置 */
+    z-index: 10;
+    margin: 0;
+}
+
+/* ===== 个人信息标题位置（可独立调整） ===== */
+#about > .container > .category-title {
+    position: absolute;
+    left: 660px;      /* ← 改这里：水平位置 */
+    top: 60px;        /* ← 改这里：垂直位置 */
+    z-index: 10;
+    margin: 0;
 }
 
 /* 统一各板块正文起始位置，使标题到正文间距一致 */
